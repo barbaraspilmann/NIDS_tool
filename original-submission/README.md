@@ -2,8 +2,8 @@
 
 This folder is a frozen snapshot of the code exactly as it was submitted to
 Manchester Metropolitan University on 10/05/2026 for the 6G6Z0019 Synoptic
-Project (Report mark: 73/100, assessor Li Guo; Creative Piece mark: 71/100,
-assessor Taysir Dyhoum). It's kept here, unmodified, for transparency — so
+Project (Report mark: 73/100, ; Creative Piece mark: 71/100,
+assessor). It's kept here, unmodified, for transparency — so
 the code matches word-for-word what the dissertation describes and what was
 graded.
 

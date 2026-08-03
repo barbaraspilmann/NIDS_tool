@@ -64,21 +64,33 @@ A few of the decisions that shaped the design, and what I weighed against them:
 
 ---
 
-## Running the pre-compiled `.exe`
+## Running from source
+```bash
+# Clone and set up a virtual environment
+git clone https://github.com/barbaraspilmann/NIDS_tool.git
+cd NIDS_tool
+python -m venv .venv
+.venv\Scripts\activate        # Windows
+# source .venv/bin/activate   # Linux/macOS
+pip install -r requirements.txt
+# Download the CICIoT2023 dataset separately (see Dataset section below)
+# and place the CSVs in a data/ folder before running the two lines below.
+# Train the model first (only needs to be done once)
+python train_model.py
+# Launch the GUI
+python gui.py
+# Or run detection from the command line
+python main.py --logfile data/ciciot2023_train01.csv --hybrid
+# Evaluate the trained model against a genuinely unseen file (train02.csv)
+python evaluate_holdout.py
+```
+A trained model is already included at `models/rf_nids_brain.pkl`, so `train_model.py` doesn't need to be re-run just to try detection — `gui.py` or `main.py --hybrid` will pick it up as-is.
 
-A pre-compiled Windows build is included in `dist/NIDS-Tool/`.
-
-1. **Copy the dataset** — the CICIoT2023 CSV files are not bundled (they are several GB). Place them in a `data/` folder next to `NIDS-Tool.exe`:
-   ```
-   dist/
-   └── NIDS-Tool/
-       ├── NIDS-Tool.exe
-       ├── data/
-       │   └── ciciot2023_train01.csv   ← put it here
-       ├── models/
-       ├── reports/
-       └── logs/
-   ```
+**Building a standalone `.exe`** (optional — this is how the submitted version was packaged):
+```bash
+pyinstaller nids_tool.spec
+```
+---
 
 2. **Launch the app** — double-click `NIDS-Tool.exe`. No Python installation required.
 
@@ -146,8 +158,11 @@ This project uses the [CICIoT2023 dataset](https://www.unb.ca/cic/datasets/iotda
 
 **Testing the Software:**
 For convenience during the assessment, a 140 MB sample of the dataset (`ciciot2023_train01.csv`) has been included in the `data/` directory. This allows the examiner to immediately test the software's training and detection pipelines without needing to download the full multi-gigabyte dataset from the official provider. 
-
 To run a test, simply launch `NIDS-Tool.exe` and select this file from the `data/` folder.
+
+It's released under CC BY 4.0, which is why it's cited here rather than bundled in this repo — the files themselves run into the tens of GB, and redistributing them isn't necessary when they're freely available from the source above.
+
+**To try the software yourself:** download `train01.csv` (and `train02.csv` if you want to run `evaluate_holdout.py`) from the link above and place them in a `data/` folder at the project root. `logs/sample_log.csv` is included directly in this repo for testing the legacy rule-based mode without needing the full dataset.
 
 ---
 

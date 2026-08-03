@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Detection Performance vs. Confidence Threshold</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #ffffff;
+      font-family: "Georgia", "Times New Roman", serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 48px 32px;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #c8c8c8;
+      border-radius: 3px;
+      padding: 40px 48px 36px;
+      width: 820px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 17px;
+      font-weight: bold;
+      color: #111;
+      margin-bottom: 5px;
+      letter-spacing: 0.01em;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 12.5px;
+      color: #555;
+      font-style: italic;
+      margin-bottom: 30px;
+    }
+    .chart-area {
+      position: relative;
+      height: 420px;
+    }
+    .caption {
+      text-align: center;
+      font-size: 12px;
+      color: #444;
+      margin-top: 20px;
+      font-style: italic;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>Detection Performance vs. Confidence Threshold</h1>
+  <p class="subtitle">Random Forest Classifier &mdash; Hybrid NIDS Pipeline</p>
+  <div class="chart-area">
+    <canvas id="chart"></canvas>
+  </div>
+  <p class="caption">
+    Figure 1. Effect of confidence threshold &theta; on True Positive Rate (Recall) and False Positive Rate.<br>
+    &theta;&thinsp;=&thinsp;0.60 was selected as the operational threshold, balancing detection sensitivity against false alarm rate.
+  </p>
+</div>
+
+<script>
+const labels = [0.50, 0.60, 0.70, 0.80, 0.90];
+const tprData = [0.982, 0.951, 0.912, 0.864, 0.801];
+const fprData = [0.148, 0.079, 0.038, 0.017, 0.009];
+
+// Vertical dashed reference line plugin (θ = 0.60, index 1)
+const refLinePlugin = {
+  id: 'refLine',
+  afterDraw(chart) {
+    const { ctx, chartArea, scales } = chart;
+    const x = scales.x.getPixelForValue(0.60);
+    const top = chartArea.top;
+    const bottom = chartArea.bottom;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.setLineDash([7, 4]);
+    ctx.lineWidth = 1.8;
+    ctx.strokeStyle = '#000000';
+    ctx.moveTo(x, top);
+    ctx.lineTo(x, bottom);
+    ctx.stroke();
+
+    // Label above the line
+    ctx.setLineDash([]);
+    ctx.font = 'bold 11px Georgia, serif';
+    ctx.fillStyle = '#000000';
+    ctx.textAlign = 'center';
+    ctx.fillText('Selected Threshold', x, top - 22);
+    ctx.fillText('(θ = 0.60)', x, top - 9);
+    ctx.restore();
+  }
+};
+
+const ctx = document.getElementById('chart').getContext('2d');
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [
+      {
+        label: 'True Positive Rate (Recall)',
+        data: tprData,
+        borderColor: '#2a9d2a',
+        backgroundColor: 'transparent',
+        borderWidth: 2.5,
+        pointRadius: 5,
+        pointBackgroundColor: '#2a9d2a',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 1.5,
+        tension: 0.35,
+      },
+      {
+        label: 'False Positive Rate',
+        data: fprData,
+        borderColor: '#cc2222',
+        backgroundColor: 'transparent',
+        borderWidth: 2.5,
+        pointRadius: 5,
+        pointBackgroundColor: '#cc2222',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 1.5,
+        tension: 0.35,
+      },
+    ],
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: false,
+    layout: { padding: { top: 36, right: 16, bottom: 4, left: 4 } },
+    scales: {
+      x: {
+        type: 'linear',
+        min: 0.48,
+        max: 0.92,
+        ticks: {
+          values: [0.50, 0.60, 0.70, 0.80, 0.90],
+          callback: v => v.toFixed(2),
+          font: { family: 'Georgia, serif', size: 12.5 },
+          color: '#222',
+          maxTicksLimit: 5,
+        },
+        grid: { color: '#e0e0e0', lineWidth: 1 },
+        border: { color: '#555' },
+        title: {
+          display: true,
+          text: 'Confidence Threshold (θ)',
+          font: { family: 'Georgia, serif', size: 13.5, weight: 'bold' },
+          color: '#111',
+          padding: { top: 10 },
+        },
+      },
+      y: {
+        min: 0.0,
+        max: 1.0,
+        ticks: {
+          stepSize: 0.1,
+          callback: v => v.toFixed(1),
+          font: { family: 'Georgia, serif', size: 12.5 },
+          color: '#222',
+        },
+        grid: { color: '#e0e0e0', lineWidth: 1 },
+        border: { color: '#555' },
+        title: {
+          display: true,
+          text: 'Rate',
+          font: { family: 'Georgia, serif', size: 13.5, weight: 'bold' },
+          color: '#111',
+          padding: { bottom: 10 },
+        },
+      },
+    },
+    plugins: {
+      legend: {
+        display: true,
+        position: 'bottom',
+        labels: {
+          font: { family: 'Georgia, serif', size: 12.5 },
+          color: '#111',
+          padding: 22,
+          usePointStyle: true,
+          pointStyleWidth: 28,
+          generateLabels(chart) {
+            const base = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+            // Append the reference line entry manually
+            base.push({
+              text: 'Selected Threshold (θ = 0.60)',
+              strokeStyle: '#000000',
+              fillStyle: 'transparent',
+              lineWidth: 2,
+              lineDash: [6, 3],
+              pointStyle: 'line',
+              hidden: false,
+              datasetIndex: -1,
+            });
+            return base;
+          },
+        },
+      },
+      tooltip: {
+        backgroundColor: '#fff',
+        borderColor: '#ccc',
+        borderWidth: 1,
+        titleColor: '#111',
+        bodyColor: '#111',
+        titleFont: { family: 'Georgia, serif', size: 12, weight: 'bold' },
+        bodyFont: { family: 'Georgia, serif', size: 11.5 },
+        callbacks: {
+          title: items => 'θ = ' + items[0].label,
+          label: item => `${item.dataset.label}: ${item.raw.toFixed(3)}`,
+        },
+      },
+    },
+  },
+  plugins: [refLinePlugin],
+});
+</script>
+</body>
+</html>

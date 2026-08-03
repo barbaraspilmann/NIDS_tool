@@ -1,0 +1,34 @@
+# --- Datasets (too large for GitHub, and not mine to redistribute) ---
+data/*.csv
+
+# --- University report / presentation files — not part of the code repo ---
+Spilmann_Barbara_23671180_CreativePiece.docx
+Spilmann_Barbara_23671180_CreativePiece.pdf
+Spilmann_Barbara_23671180_Presentation.pptx
+
+# --- Local setup notes — reference only, not part of the repo ---
+GITHUB_SETUP_GUIDE.md
+
+# --- PyInstaller build output (regenerate with: pyinstaller nids_tool.spec) ---
+dist/
+build/
+
+# --- Runtime-generated reports — keep the two showcase files, ignore the rest ---
+reports/*
+!reports/shap_summary.png
+!reports/training_results.html
+!reports/.gitkeep
+
+# --- Python ---
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# --- OS junk ---
+.DS_Store
+Thumbs.db
+
+# --- Editor junk ---
+.vscode/
+.idea/
